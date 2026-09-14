@@ -8,7 +8,7 @@ data/generate_data.py.
 import numpy as np
 import torch
 import torch.nn as nn
-from models.PhysicsNN import PhysicsNN
+from models.ArrheniusStateSurrogate import PhysicsNN
 
 
 def load_dataset(path="data/raw/training_data.npz"):
