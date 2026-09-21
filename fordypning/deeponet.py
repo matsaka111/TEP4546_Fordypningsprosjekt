@@ -7,7 +7,7 @@ class DeepONetCRK(nn.Module):
     Branch net encodes the fixed initial condition of a trajectory
     (Y0, T0, phi, P) into a latent vector. Trunk net encodes the query
     time t. Output is their dot product per channel (T + n_species).
-    No autoregressive chaining -- state(t) is one forward pass, so
+    No autoregressive chaining, state(t) is one forward pass, so
     per-step compounding error (the reason CRKPINN needed K-step rollout
     training) cannot occur here by construction.
     """

@@ -68,13 +68,15 @@ def train_deeponet(df_bin: pd.DataFrame, label: str, species: list[str]):
         for i in range(0, n_train, cfg.train.batch_size):
             idx = perm[i:i + cfg.train.batch_size]
 
-            T_pred, Y_pred, info = model(Y0_tr[idx], T0_tr[idx], phi_tr[idx], P_tr[idx], t_tr[idx], tend_tr[idx])
+            T_pred, Y_pred, info = model(Y0_tr[idx], T0_tr[idx], phi_tr[idx], P_tr[idx],
+                                          t_tr[idx], tend_tr[idx])
 
             Tn_true = (T_tr[idx] - model.T_mean) / model.T_std
             Yn_true = (torch.log(torch.clamp(Y_tr[idx], min=Y_MIN)) - model.logY_mean) / model.logY_std
 
             loss = loss_fn(info["Tn_pred"], Tn_true, delta=5.0) \
                  + loss_fn(info["Yn_pred"], Yn_true, delta=5.0)
+
             opt.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -104,18 +106,23 @@ def main():
     df = pd.read_csv(CSV_PATH)
     species = get_species_names()
 
-    df_bin1 = df[df["bin_idx"] == 1]
-    ign_traj = df_bin1.groupby("traj_idx")["ignited"].first()
+    bins_to_run = [int(b) for b in sys.argv[1:]] if len(sys.argv) > 1 else [0, 1, 2, 3, 4]
+    print(f"training bins: {bins_to_run}")
 
-    df_ign = df_bin1[df_bin1["traj_idx"].isin(ign_traj[ign_traj].index)]
-    df_noign = df_bin1[df_bin1["traj_idx"].isin(ign_traj[~ign_traj].index)]
+    for bin_idx in bins_to_run:
+        df_bin = df[df["bin_idx"] == bin_idx]
+        if len(df_bin) == 0:
+            print(f"bin {bin_idx}: no data, skipping")
+            continue
 
-    train_deeponet(df_ign, "bin1_ignite", species)
-    train_deeponet(df_noign, "bin1_noignite", species)
-
-
-if __name__ == "__main__":
-    main()
+        if bin_idx == 1:
+            ign_traj = df_bin.groupby("traj_idx")["ignited"].first()
+            df_ign = df_bin[df_bin["traj_idx"].isin(ign_traj[ign_traj].index)]
+            df_noign = df_bin[df_bin["traj_idx"].isin(ign_traj[~ign_traj].index)]
+            train_deeponet(df_ign, "bin1_ignite", species)
+            train_deeponet(df_noign, "bin1_noignite", species)
+        else:
+            train_deeponet(df_bin, f"bin{bin_idx}", species)
 
 
 if __name__ == "__main__":
