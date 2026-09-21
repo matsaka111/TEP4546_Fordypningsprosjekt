@@ -34,7 +34,7 @@ OXIDIZER = "O2:1, N2:3.76"  # air
 N_TRAJECTORIES = 1000
 SIM_TIME = 1.0                 # seconds, integration horizon (upper bound) -- CH4/air can be slower to ignite than H2/O2
 
-T0_RANGE = (1000.0, 1600.0)    # CH4/air needs hotter conditions than H2/O2 to reliably autoignite in reasonable time
+T0_RANGE = (500.0, 1600.0)    # CH4/air needs hotter conditions than H2/O2 to reliably autoignite in reasonable time
 PHI_RANGE = (0.5, 2.0)
 P_FIXED = 101325.0
 

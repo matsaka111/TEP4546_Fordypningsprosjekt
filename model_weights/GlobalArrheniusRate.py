@@ -25,7 +25,7 @@ class GlobalArrheniusRate(nn.Module):
         self.n_species = n_species
         self.register_buffer("mw", torch.tensor(molecular_weights, dtype=torch.float32))
 
-        self.dependent_idx = int(torch.argmax(self.mw).item())
+        self.dependent_idx = int(torch.argmax(self.mw).item())      # largest molecular weight species as dependent species
         self.free_idx = [i for i in range(n_species) if i != self.dependent_idx]
 
         in_dim = n_species + 1  # T, Y
@@ -66,7 +66,7 @@ class GlobalArrheniusRate(nn.Module):
         b = self.b_max * torch.tanh(out[:, 1])
         Ea = nn.functional.softplus(out[:, 2])
         nu_free = self.nu_max * torch.tanh(out[:, 3:] / self.nu_max)
-        nu = self._assemble_nu(nu_free)
+        nu = self._assemble_nu(nu_free)     # mass cons
 
         log_k = torch.log(A) + b * torch.log(self.T_ref / T) - Ea / (R_GAS * T)
 
