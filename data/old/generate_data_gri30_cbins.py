@@ -32,7 +32,7 @@ N_BINS_T0 = 5                  # bin width = (T0_HI - T0_LO) / N_BINS_T0 = 300 K
 N_TRAJECTORIES_PER_BIN = 600   # ~3000 trajectories total across all bins
 
 SIM_TIME = 0.5                 # seconds, integration horizon
-PHI_RANGE = (0.5, 2.0)
+PHI_RANGE = (0.5, 2.0)      # Increase to 6,9 if we want to capture C2H6 Sot
 P_FIXED = 101325.0
 
 # sampling budget, split across three regions of a trajectory

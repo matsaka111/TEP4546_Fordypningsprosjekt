@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-fordypning/__init__.py
-fordypning/config.py
-fordypning.egg-info/PKG-INFO
-fordypning.egg-info/SOURCES.txt
-fordypning.egg-info/dependency_links.txt
-fordypning.egg-info/requires.txt
-fordypning.egg-info/top_level.txt

@@ -1,0 +1,67 @@
+nohup: ignoring input
+/home/MatsAlbert/miniconda3/envs/TEP4541/lib/python3.12/site-packages/torch/cuda/__init__.py:827: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+using device: cuda
+fixed test trajectories: [370, 82, 1029, 902, 1529, 1295, 1809, 1831, 2435, 2653]
+
+########## crkpinn / no_bin ##########
+  training bin0_ignite  (n_traj=1908)
+  training bin0_noignite  (n_traj=1092)
+
+########## crkpinn / 2_bins ##########
+  training bin0_ignite  (n_traj=398)
+  training bin0_noignite  (n_traj=1092)
+  training bin1  (n_traj=1510)
+
+########## crkpinn / 5_bins ##########
+  training bin0  (n_traj=600)
+  training bin1_ignite  (n_traj=108)
+  training bin1_noignite  (n_traj=492)
+  training bin2  (n_traj=600)
+  training bin3  (n_traj=600)
+  training bin4  (n_traj=600)
+
+########## crkpinn / 10_bins ##########
+  training bin0  (n_traj=310)
+  training bin1  (n_traj=290)
+  training bin2  (n_traj=307)
+  training bin3_ignite  (n_traj=108)
+  training bin3_noignite  (n_traj=185)
+  training bin4  (n_traj=290)
+  training bin5  (n_traj=310)
+  training bin6  (n_traj=299)
+  training bin7  (n_traj=301)
+  training bin8  (n_traj=305)
+  training bin9  (n_traj=295)
+
+########## deeponet / no_bin ##########
+  training bin0_ignite  (n_traj=1908)
+  training bin0_noignite  (n_traj=1092)
+
+########## deeponet / 2_bins ##########
+  training bin0_ignite  (n_traj=398)
+  training bin0_noignite  (n_traj=1092)
+  training bin1  (n_traj=1510)
+
+########## deeponet / 5_bins ##########
+  training bin0  (n_traj=600)
+  training bin1_ignite  (n_traj=108)
+  training bin1_noignite  (n_traj=492)
+  training bin2  (n_traj=600)
+  training bin3  (n_traj=600)
+  training bin4  (n_traj=600)
+
+########## deeponet / 10_bins ##########
+  training bin0  (n_traj=310)
+  training bin1  (n_traj=290)
+  training bin2  (n_traj=307)
+  training bin3_ignite  (n_traj=108)
+  training bin3_noignite  (n_traj=185)
+  training bin4  (n_traj=290)
+  training bin5  (n_traj=310)
+  training bin6  (n_traj=299)
+  training bin7  (n_traj=301)
+  training bin8  (n_traj=305)
+  training bin9  (n_traj=295)
+
+saved full results to results/sweep_results_full.csv  (80 rows)

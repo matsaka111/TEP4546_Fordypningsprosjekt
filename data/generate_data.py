@@ -1,23 +1,7 @@
 """
-Trajectory-based training data generator for GRI-Mech 3.0 CH4/air combustion.
-
-Same ignition-aware sampling strategy as generate_data_simple.py's v2 (H2/O2)
-version: a cheap scouting pass locates each trajectory's ignition time
-(peak dT/dt), then most samples are concentrated in a window around it,
-with only a few points in the flat pre-/post-ignition regions. This avoids
-the data-imbalance problem that made earlier rate-based models collapse to
-predicting ~0 everywhere.
-
-Differences from the H2/O2 version:
-  - MECH = gri30.yaml (53 species, 325 reactions) instead of h2o2.yaml
-  - Fuel/oxidizer: CH4 vs air (O2:1, N2:3.76), not H2 vs pure O2
-  - T0_RANGE shifted higher and SIM_TIME extended -- CH4/air autoignition
-    delay times are generally longer than H2/O2's, especially at the lower
-    end of the temperature range, and low-T0 conditions may not ignite
-    within SIM_TIME at all (check the printed ignited/total ratio)
-  - N_TRAJECTORIES increased for a larger dataset
-
-Output: single CSV, one row per (trajectory, time) sample.
+File for generating data for TEP4541 project. 
+Creates datapoints for trajectories used to train and 
+validate machine learning models.
 """
 
 import os
@@ -26,37 +10,51 @@ import pandas as pd
 import cantera as ct
 
 # ---------------- Config ----------------
-OUTPUT_CSV = "raw/gri30_ch4_air_trajectories.csv"
 MECH = "gri30.yaml"
 FUEL = "CH4"
-OXIDIZER = "O2:1, N2:3.76"  # air
+OXIDIZER = "O2:1, N2:3.76"          # air
 
-N_TRAJECTORIES = 5000
-SIM_TIME = 1.0                 # seconds
+T0_RANGE = (500.0, 2000.0)          # K
+PHI_RANGE = (0.5, 8.0)              # outside GRI-Mech's stated validity (phi 0.1-5, T 1000-2500 K)
+P_FIXED = 101325.0                  # Pa, constant-pressure reactor
+SIM_TIME = 0.5                      # s
 
-T0_RANGE = (300.0, 2000.0)    
-PHI_RANGE = (0.5, 2.0)
-P_FIXED = 101325.0
+N_BINS_T0 = 10
+N_TRAIN_PER_BIN = 12000
+N_TEST_PER_BIN = 2000
 
-# sampling budget, split across three regions of a trajectory
 N_PRE_IGNITION = 15
 N_IGNITION = 70
 N_POST_IGNITION = 15
-
 IGNITION_WINDOW_LO = 0.3
 IGNITION_WINDOW_HI = 3.0
 
-SEED = 42
+DTDT_THRESHOLD = 1e5
+
+TRAIN_CSV = "raw/data_train.csv"
+TEST_CSV = "raw/data_test.csv"
+
+TRAIN_SEED = 42
+TEST_SEED = 1337
 # -----------------------------------------
 
-rng = np.random.default_rng(SEED)
+
+def sample_initial_conditions(n_per_bin, seed):
+    rng = np.random.default_rng(seed)
+    edges = np.linspace(T0_RANGE[0], T0_RANGE[1], N_BINS_T0 + 1)
+    T0s, phis, bins = [], [], []
+    for b in range(N_BINS_T0):
+        T0s.append(rng.uniform(edges[b], edges[b + 1], n_per_bin))
+        phis.append(rng.uniform(*PHI_RANGE, n_per_bin))
+        bins.append(np.full(n_per_bin, b))
+    return pd.DataFrame({
+        "T0": np.concatenate(T0s),
+        "phi": np.concatenate(phis),
+        "bin_idx": np.concatenate(bins),
+    })
 
 
-def scout_ignition_time(gas, T0, phi, P0, n_scout_steps=5000):
-    """Same approach as the H2/O2 version -- track dT/dt over the solver's
-    own adaptive steps to cheaply locate ignition. n_scout_steps raised vs.
-    the H2/O2 version since GRI30 trajectories can need more internal steps
-    to resolve the stiffer, longer-duration chemistry."""
+def scout_ignition(gas, T0, phi, P0, n_scout_steps=5000):
     gas.TP = T0, P0
     gas.set_equivalence_ratio(phi, FUEL, OXIDIZER)
     gas.TP = T0, P0
@@ -65,43 +63,47 @@ def scout_ignition_time(gas, T0, phi, P0, n_scout_steps=5000):
     net = ct.ReactorNet([reactor])
 
     t_prev, T_prev = 0.0, gas.T
-    t_ign, max_dTdt = 0.0, 0.0
+    t_peak, max_dTdt = np.nan, 0.0
+    reached_end = False
 
     for _ in range(n_scout_steps):
         t = net.step()
-        dT = gas.T - T_prev
         dt = t - t_prev
         if dt > 0:
-            dTdt = dT / dt
+            dTdt = (gas.T - T_prev) / dt
             if dTdt > max_dTdt:
                 max_dTdt = dTdt
-                t_ign = t_prev + 0.5 * dt
+                t_peak = t_prev + 0.5 * dt
         t_prev, T_prev = t, gas.T
         if t >= SIM_TIME:
+            reached_end = True
             break
 
-    ignited = max_dTdt > 1e5   # lower threshold than the H2/O2 version -- CH4/air ignition is generally less explosive
-    return t_ign, ignited
+    ignited = max_dTdt > DTDT_THRESHOLD
+    t_ign = t_peak if ignited else np.nan
+    return t_ign, ignited, reached_end
 
 
 def build_sample_schedule(t_ign, ignited):
-    if not ignited or t_ign <= 0:
-        return np.logspace(np.log10(SIM_TIME / 1e6), np.log10(SIM_TIME),
-                            N_PRE_IGNITION + N_IGNITION + N_POST_IGNITION)
+    n_total = N_PRE_IGNITION + N_IGNITION + N_POST_IGNITION
+    t_min = SIM_TIME / 1e6
 
-    t_lo = max(t_ign * IGNITION_WINDOW_LO, SIM_TIME / 1e6)
+    if not ignited:
+        return np.logspace(np.log10(t_min), np.log10(SIM_TIME), n_total)
+
+    t_lo = max(t_ign * IGNITION_WINDOW_LO, t_min)
     t_hi = min(t_ign * IGNITION_WINDOW_HI, SIM_TIME)
 
-    pre = np.logspace(np.log10(SIM_TIME / 1e6), np.log10(t_lo), N_PRE_IGNITION, endpoint=False)
+    pre = np.logspace(np.log10(t_min), np.log10(t_lo), N_PRE_IGNITION, endpoint=False)
     ign = np.linspace(t_lo, t_hi, N_IGNITION)
     post = np.logspace(np.log10(t_hi), np.log10(SIM_TIME), N_POST_IGNITION + 1)[1:]
 
-    return np.concatenate([pre, ign, post])
+    return np.unique(np.concatenate([pre, ign, post]))
 
 
-def run_trajectory(gas, T0, phi, P0, traj_idx):
-    t_ign, ignited = scout_ignition_time(gas, T0, phi, P0)
-    t_points = np.sort(build_sample_schedule(t_ign, ignited))
+def run_trajectory(gas, T0, phi, P0, traj_idx, bin_idx):
+    t_ign, ignited, reached_end = scout_ignition(gas, T0, phi, P0)
+    t_points = build_sample_schedule(t_ign, ignited)
 
     gas.TP = T0, P0
     gas.set_equivalence_ratio(phi, FUEL, OXIDIZER)
@@ -119,53 +121,67 @@ def run_trajectory(gas, T0, phi, P0, traj_idx):
         except ct.CanteraError:
             break
 
-        rho = gas.density
-        wdot = gas.net_production_rates
-        mw = gas.molecular_weights
-        Ydot = wdot * mw / rho
-
-        u_partial = gas.partial_molar_int_energies
-        cv = gas.cv_mass
-        Tdot = -np.sum(u_partial * wdot) / (rho * cv)
-
         record = {
-            "traj_idx": traj_idx, "t": t, "T": gas.T, "P": gas.P, "rho": rho,
-            "Tdot": Tdot, "T0": T0, "phi": phi, "t_ign": t_ign, "ignited": ignited,
+            "traj_idx": traj_idx, "bin_idx": bin_idx, "t": t, "T": gas.T, "P": gas.P,
+            "rho": gas.density, "T0": T0, "phi": phi,
+            "t_ign": t_ign, "ignited": ignited, "reached_end": reached_end,
         }
         record.update({f"Y_{s}": y for s, y in zip(species_cols, gas.Y)})
-        record.update({f"Ydot_{s}": yd for s, yd in zip(species_cols, Ydot)})
         rows.append(record)
 
     return rows
 
 
-def main():
+def generate(ic_df, seed_label):
     gas = ct.Solution(MECH)
     all_rows = []
     n_ignited = 0
+    n_not_reached = 0
 
-    for traj_idx in range(N_TRAJECTORIES):
-        T0 = rng.uniform(*T0_RANGE)
-        phi = rng.uniform(*PHI_RANGE)
+    for i, row in ic_df.iterrows():
         try:
-            rows = run_trajectory(gas, T0, phi, P_FIXED, traj_idx)
+            rows = run_trajectory(gas, row["T0"], row["phi"], P_FIXED, i, int(row["bin_idx"]))
         except ct.CanteraError:
             continue
-        if rows and rows[0]["ignited"]:
-            n_ignited += 1
+        if rows:
+            if rows[0]["ignited"]:
+                n_ignited += 1
+            if not rows[0]["reached_end"]:
+                n_not_reached += 1
         all_rows.extend(rows)
 
-        if (traj_idx + 1) % 50 == 0:
-            print(f"...{traj_idx + 1}/{N_TRAJECTORIES} trajectories done")
+        if (i + 1) % 500 == 0:
+            print(f"[{seed_label}] ...{i + 1}/{len(ic_df)} trajectories done")
 
     out_df = pd.DataFrame(all_rows)
-    print(f"Generated {len(out_df)} datapoints across {out_df['traj_idx'].nunique()} trajectories")
-    print(f"{n_ignited}/{out_df['traj_idx'].nunique()} trajectories ignited within SIM_TIME")
-    print(f"Temperature range: {out_df['T'].min():.1f} K to {out_df['T'].max():.1f} K")
+    n_traj_total = out_df["traj_idx"].nunique()
+    print(f"[{seed_label}] Generated {len(out_df)} datapoints across {n_traj_total} trajectories")
+    print(f"[{seed_label}] {n_ignited}/{n_traj_total} ignited")
+    print(f"[{seed_label}] {n_not_reached}/{n_traj_total} scouting pass did NOT reach SIM_TIME "
+          f"(possible missed ignition beyond scout step budget)")
 
-    os.makedirs(os.path.dirname(OUTPUT_CSV), exist_ok=True)
-    out_df.to_csv(OUTPUT_CSV, index=False)
-    print(f"Saved to {OUTPUT_CSV}")
+    print(f"[{seed_label}] Per-bin trajectory / ignition counts:")
+    for b in range(N_BINS_T0):
+        sub = out_df[out_df["bin_idx"] == b]
+        n_traj = sub["traj_idx"].nunique()
+        n_ign = sub.groupby("traj_idx")["ignited"].first().sum()
+        print(f"  bin {b}: {n_traj} traj, {n_ign} ignited")
+
+    return out_df
+
+
+def main():
+    os.makedirs("raw", exist_ok=True)
+
+    train_ic = sample_initial_conditions(N_TRAIN_PER_BIN, TRAIN_SEED)
+    train_df = generate(train_ic, "train")
+    train_df.to_csv(TRAIN_CSV, index=False)
+    print(f"Saved train to {TRAIN_CSV}")
+
+    test_ic = sample_initial_conditions(N_TEST_PER_BIN, TEST_SEED)
+    test_df = generate(test_ic, "test")
+    test_df.to_csv(TEST_CSV, index=False)
+    print(f"Saved test to {TEST_CSV}")
 
 
 if __name__ == "__main__":

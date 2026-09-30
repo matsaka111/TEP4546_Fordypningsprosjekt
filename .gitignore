@@ -1,6 +1,21 @@
-Miniconda3-latest-Linux-x86_64.sh
+# data
+data/**/*.csv
+data/**/*.parquet
+data/**/*.npz
+data/**/*.h5
+*.csv
+*.parquet
+
+# model weights / results
+*.pt
+*.pth
+model_weights/
+results/**/*.pt
+
+# logs, python, notebooks
+*.log
+generate_log.txt
 __pycache__/
-*.pyc
-.vscode/
-data/raw/
-data/processed/
+*.egg-info/
+.ipynb_checkpoints/
+Miniconda3-*.sh
