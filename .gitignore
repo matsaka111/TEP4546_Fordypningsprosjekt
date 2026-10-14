@@ -19,3 +19,9 @@ __pycache__/
 *.egg-info/
 .ipynb_checkpoints/
 Miniconda3-*.sh
+logs/
+logs_*.txt
+results/global/
+results/bo/
+*.npz
+*.pt

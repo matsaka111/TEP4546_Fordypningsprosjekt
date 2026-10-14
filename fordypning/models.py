@@ -26,10 +26,14 @@ class CRKPINN(nn.Module):
 
     Y_MIN = 1e-10  # clipped-log floor
 
-    def __init__(self, n_species, hidden=128, n_hidden_layers=3, residual=False):
+    def __init__(self, n_species, hidden=128, n_hidden_layers=3, residual=False,
+                 log_time=False):
         super().__init__()
         self.n_species = n_species
         self.residual = residual
+        # log_time=True: dt input is ln(dt / t_end) instead of dt / t_end.
+        # Needed for one global model, where dt/t_end spans many decades.
+        self.log_time = log_time
 
         in_dim = n_species + 4
         out_dim = n_species + 1
@@ -101,6 +105,8 @@ class CRKPINN(nn.Module):
 
     def normalize_tprime(self, t, t_end):
         raw = t / torch.clamp(t_end, min=1e-12)
+        if self.log_time:
+            raw = torch.log(torch.clamp(raw, min=1e-12))
         return (raw - self.tprime_mean) / self.tprime_std
 
     def forward(self, T, Y, T0, P, dt, t_end):

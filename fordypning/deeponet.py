@@ -15,8 +15,11 @@ class DeepONetCRK(nn.Module):
     Y_MIN = 1e-10
 
     def __init__(self, n_species, p=64, branch_hidden=128, trunk_hidden=64,
-                 branch_layers=3, trunk_layers=3):
+                 branch_layers=3, trunk_layers=3, log_time=False):
         super().__init__()
+        # log_time=True: trunk input is ln(t / t_end) instead of t / t_end.
+        # Needed for one global model, where t/t_end spans ~1e-6 to ~1e3.
+        self.log_time = log_time
         self.n_species = n_species
         self.n_outputs = n_species + 1
         self.p = p
@@ -86,6 +89,8 @@ class DeepONetCRK(nn.Module):
 
     def normalize_tprime(self, t, t_end):
         raw = t / torch.clamp(t_end, min=1e-12)
+        if self.log_time:
+            raw = torch.log(torch.clamp(raw, min=1e-12))
         return (raw - self.tprime_mean) / self.tprime_std
 
     def denormalize_Y(self, Yn):

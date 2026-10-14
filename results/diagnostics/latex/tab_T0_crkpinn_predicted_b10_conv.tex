@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrrr}
+        \hline
+        $T_0$ [K] & $n$ & $n_\mathrm{ign}$ & $\overline{|\Delta T|}$ [K] & $|\Delta T_\mathrm{f}|_{50}$ [K] & $|\Delta T_\mathrm{f}|_{95}$ [K] & $\epsilon_{t_\mathrm{ign}}$ [\%] & Missed \\
+        \hline
+        500--650 & 2000 & 0 & 0.00375 & 0.00369 & 0.0117 & -- & 0 \\
+        650--800 & 2000 & 0 & 24.2 & 28.5 & 65.7 & -- & 0 \\
+        800--950 & 2000 & 0 & 0.0459 & 0.029 & 0.0955 & -- & 0 \\
+        950--1100 & 2000 & 195 & 5.46 & 0.391 & 126 & 1.77 & 17.5 \\
+        1100--1250 & 2000 & 1286 & 11.3 & 8.07 & 83.3 & 0.0901 & 0.5 \\
+        1250--1400 & 2000 & 1650 & 7.35 & 4.62 & 52.9 & 0.0624 & 0 \\
+        1400--1550 & 2000 & 1995 & 3.77 & 2.47 & 21.2 & 0.127 & 0 \\
+        1550--1700 & 2000 & 2000 & 4.38 & 5.02 & 21.2 & 0.164 & 0 \\
+        1700--1850 & 2000 & 2000 & 2.81 & 4.03 & 16.1 & 0.23 & 0 \\
+        1850--2000 & 2000 & 2000 & 3.54 & 5.34 & 18.5 & 0.247 & 0 \\
+        \hline
+    \end{tabular}
+    \caption{Test-set errors per initial-temperature range, CRK-PINN, 10 bins (mean over seeds).}
+    \label{tab:T0_crkpinn_predicted_b10_conv}
+\end{table}

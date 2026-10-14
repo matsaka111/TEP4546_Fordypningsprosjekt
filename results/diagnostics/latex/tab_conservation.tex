@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrr}
+        \hline
+        Model & $|\sum Y-1|_{50}$ & $|\sum Y-1|_{95}$ & $\epsilon_{Z,50}$ & $\epsilon_{Z,95}$ & $\Delta h_{50}$ [K] & $\Delta h_{95}$ [K] \\
+        \hline
+        DeepONet, 5 bins & $7.78\times10^{-4}$ & 0.00715 & 0.005 & 0.035 & 4.43 & 35.5 \\
+        CRK-PINN, 10 bins & $6.78\times10^{-4}$ & 0.0181 & 0.00852 & 0.352 & 3.84 & 268 \\
+        DeepONet, 1 bin & 0.00366 & 0.0193 & 0.0198 & 0.0882 & 20.3 & 82.1 \\
+        \hline
+    \end{tabular}
+    \caption{Conservation errors of the predictions (median and 95th percentile). $|\sum Y-1|$: mass fraction sum, all points; $\epsilon_Z$: largest relative error in the C, H, O, N element mass fractions, all points; $\Delta h$: enthalpy error at the final state, $|h(T_\mathrm{pred},Y_\mathrm{pred})-h_0|/c_p$, expressed in K.}
+    \label{tab:conservation}
+\end{table}

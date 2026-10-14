@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrrr}
+        \hline
+        $T_0$ [K] & $n$ & $n_\mathrm{ign}$ & $\overline{|\Delta T|}$ [K] & $|\Delta T_\mathrm{f}|_{50}$ [K] & $|\Delta T_\mathrm{f}|_{95}$ [K] & $\epsilon_{t_\mathrm{ign}}$ [\%] & Missed \\
+        \hline
+        500--650 & 2000 & 0 & 0.943 & 4.06 & 9.73 & -- & 0 \\
+        650--800 & 2000 & 0 & 0.731 & 4.18 & 9.69 & -- & 0 \\
+        800--950 & 2000 & 0 & 0.71 & 4.84 & 16.1 & -- & 0 \\
+        950--1100 & 2000 & 195 & 1.4 & 5.51 & 63.4 & 0.0965 & 2 \\
+        1100--1250 & 2000 & 1286 & 2.99 & 1.91 & 55.2 & 0.0427 & 0 \\
+        1250--1400 & 2000 & 1650 & 2.14 & 1.3 & 13.6 & 0.0596 & 0 \\
+        1400--1550 & 2000 & 1995 & 1.39 & 1.14 & 2.71 & 0.043 & 0 \\
+        1550--1700 & 2000 & 2000 & 1.28 & 1.2 & 2.82 & 0.0355 & 0 \\
+        1700--1850 & 2000 & 2000 & 1.15 & 1.41 & 3.3 & 0.0515 & 0 \\
+        1850--2000 & 2000 & 2000 & 1.32 & 1.64 & 4.07 & 0.151 & 0 \\
+        \hline
+    \end{tabular}
+    \caption{Test-set errors per initial-temperature range, DeepONet, 1 bin (mean over seeds).}
+    \label{tab:T0_deeponet_predicted_b1_conv}
+\end{table}

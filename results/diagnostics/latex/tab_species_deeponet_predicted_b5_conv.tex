@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{lrrrrr}
+        \hline
+        Species & Group & $\overline{\Delta\log_{10}Y}$ & Peak err. [\%] & Peak time err. [\%] & Final err. [\%] \\
+        \hline
+        $\mathrm{CH_{2}O}$ & tracked & 0.0087 & 0.768 & 0 & 1.32 \\
+        $\mathrm{H_{2}O_{2}}$ & tracked & 0.00896 & 0.698 & 0 & 1.73 \\
+        $\mathrm{OH}$ & tracked & 0.00296 & 0.388 & 0 & 0.652 \\
+        $\mathrm{C_{2}H_{6}}$ & tracked & 0.00907 & 0.709 & 0 & 2.14 \\
+        $\mathrm{NO}$ & tracked & 0.00349 & 0.656 & 1.2 & 1.77 \\
+        $\mathrm{CO}$ & largest & 0.00534 & 0.736 & 0 & 0.871 \\
+        $\mathrm{CH_{4}}$ & largest & 0.005 & -- & -- & 1.24 \\
+        $\mathrm{O_{2}}$ & largest & 0.00819 & -- & -- & 1.04 \\
+        $\mathrm{C_{2}H_{2}}$ & largest & 0.0148 & -- & -- & 3.08 \\
+        $\mathrm{H_{2}O}$ & largest & 0.00419 & -- & -- & 0.912 \\
+        $\mathrm{CO_{2}}$ & largest & 0.00464 & -- & -- & 1.01 \\
+        \hline
+    \end{tabular}
+    \caption{Species errors on the test set, DeepONet, 5 bins. $\overline{\Delta\log_{10}Y}$: mean $|\log_{10}Y_\mathrm{pred}-\log_{10}Y_\mathrm{true}|$ over points with $Y>10^{-8}$. Peak and peak-time errors: median relative error of the trajectory maximum and of its time, igniting trajectories (tracked species and CO only). Final err.: median relative error at the last time point.}
+    \label{tab:species_deeponet_predicted_b5_conv}
+\end{table}

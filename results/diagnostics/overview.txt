@@ -1,0 +1,37 @@
+
+=== 1. Bin resolution (data loss only, mean over seeds) ===
+   model  n_bins epochs  n_seeds  T_MAE_K  final_dT_p95  ign_time_err_med  ign_missed  logY_MAE_tracked
+DeepONet       1     30        2     1.41          22.5          0.000601           4            0.0217
+DeepONet       1   conv        1     1.39          17.7          0.000525           2            0.0171
+DeepONet       2     30        2     1.14            16          0.000385         3.5            0.0196
+DeepONet       2   conv        1    0.658          11.1          0.000197           1           0.00933
+DeepONet       5     30        2     1.27          18.3          0.000668           4             0.026
+DeepONet       5   conv        1    0.431          4.71          0.000132           1           0.00719
+DeepONet      10     30        2     1.73          20.2           0.00109           3            0.0362
+CRK-PINN       1     30        2     17.3           148            0.0096          51              0.12
+CRK-PINN       1   conv        1     10.2          69.3             0.008          65            0.0756
+CRK-PINN       2     30        1     22.4           378           0.00956          66             0.174
+CRK-PINN       2   conv        1     6.54          62.5           0.00217          18            0.0478
+CRK-PINN       5     30        1      192      1.13e+03            0.0125          78             0.382
+CRK-PINN       5   conv        1      146       1.6e+03           0.00176           0             0.206
+CRK-PINN      10     30        2       96      1.04e+03             0.017        88.5             0.575
+CRK-PINN      10   conv        1     5.77          39.5           0.00182          24            0.0335
+
+=== 2. Physics losses, CRK-PINN 1 bin(s): test errors ===
+                loss  n_seeds  T_MAE_K  final_dT_p95  ign_time_err_med  ign_missed  logY_MAE_tracked  T_MAE_K vs base %  logY_MAE_tracked vs base %
+data only (baseline)        2     17.3           148            0.0096          51              0.12                  0                           0
+            mole 0.1        1     17.5           130            0.0117         138             0.135               1.39                        12.6
+              mole 1        1     17.3           180           0.00755          58             0.134              0.531                        11.7
+             mole 10        1     30.7           243            0.0372          16             0.287                 78                         139
+
+=== 2. Physics losses, CRK-PINN 1 bin(s): conservation residuals ===
+                loss  mass_sum_err_med  element_err_med  enthalpy_err_K_med  entropy_viol_frac  entropy_viol_K_p95
+data only (baseline)           0.00347             0.03                17.7                NaN                 NaN
+            mole 0.1          0.000898           0.0218                  14                NaN                 NaN
+              mole 1          0.000369           0.0225                17.7                NaN                 NaN
+             mole 10          0.000435           0.0451                49.8                NaN                 NaN
+
+=== 3. Best configuration per architecture (lowest mean |dT|) ===
+   model                     config  n_seeds  T_MAE_K  final_dT_p95  ign_time_err_med  ign_missed  logY_MAE_tracked
+CRK-PINN crkpinn_predicted_b10_conv        1     5.77          39.5           0.00182          24            0.0335
+DeepONet deeponet_predicted_b5_conv        1    0.431          4.71          0.000132           1           0.00719

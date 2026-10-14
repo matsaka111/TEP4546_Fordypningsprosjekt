@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{lrrrrr}
+        \hline
+        Species & Group & $\overline{\Delta\log_{10}Y}$ & Peak err. [\%] & Peak time err. [\%] & Final err. [\%] \\
+        \hline
+        $\mathrm{CH_{2}O}$ & tracked & 0.024 & 0.447 & 0 & 2.23 \\
+        $\mathrm{H_{2}O_{2}}$ & tracked & 0.0204 & 0.474 & 0 & 4.01 \\
+        $\mathrm{OH}$ & tracked & 0.026 & 2.11 & 0 & 4.68 \\
+        $\mathrm{C_{2}H_{6}}$ & tracked & 0.0303 & 0.743 & 0 & 5.35 \\
+        $\mathrm{NO}$ & tracked & 0.05 & 3.49 & 2.82 & 8.6 \\
+        $\mathrm{CO}$ & largest & 0.0142 & 1.39 & 0 & 1.61 \\
+        $\mathrm{CH_{4}}$ & largest & 0.0432 & -- & -- & 3.45 \\
+        $\mathrm{O_{2}}$ & largest & 0.0343 & -- & -- & 3.63 \\
+        $\mathrm{C_{2}H_{2}}$ & largest & 0.048 & -- & -- & 1.57 \\
+        $\mathrm{H_{2}O}$ & largest & 0.00918 & -- & -- & 1.71 \\
+        $\mathrm{CO_{2}}$ & largest & 0.0125 & -- & -- & 1.86 \\
+        \hline
+    \end{tabular}
+    \caption{Species errors on the test set, CRK-PINN, 10 bins. $\overline{\Delta\log_{10}Y}$: mean $|\log_{10}Y_\mathrm{pred}-\log_{10}Y_\mathrm{true}|$ over points with $Y>10^{-8}$. Peak and peak-time errors: median relative error of the trajectory maximum and of its time, igniting trajectories (tracked species and CO only). Final err.: median relative error at the last time point.}
+    \label{tab:species_crkpinn_predicted_b10_conv}
+\end{table}

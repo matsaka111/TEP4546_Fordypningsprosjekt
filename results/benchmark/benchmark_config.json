@@ -1,0 +1,25 @@
+{
+  "cpu": "Intel(R) Xeon(R) CPU E5-2660 v4 @ 2.00GHz",
+  "cpu_count": 56,
+  "gpu": "Quadro M4000",
+  "torch": "2.9.1",
+  "cantera": "3.2.0",
+  "torch_cpu_threads": 28,
+  "args": {
+    "deeponet_run": "results/global/deeponet_predicted_b10_s2_conv",
+    "crkpinn_run": "results/global/crkpinn_predicted_b10_s2_conv",
+    "idt_model": "model_weights/idt_predictor.pt",
+    "test_csv": "data/raw/data_test.csv",
+    "n_traj": 1000,
+    "seed": 2026,
+    "cores": null,
+    "cells": "1000,10000,100000,1000000",
+    "dt_cell": 1e-06,
+    "max_cantera_cells": 10000,
+    "batch": 65536,
+    "skip_a": true,
+    "skip_timing": false,
+    "skip_b": false,
+    "out": "results/benchmark"
+  }
+}
